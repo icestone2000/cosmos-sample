@@ -15,6 +15,7 @@ import {
   useColorModeValue,
   useTheme,
 } from "@interchain-ui/react";
+import { dataSourceProvider } from "@/config";
 
 let dataLoaded = false;
 function CreateCosmosApp({ Component, pageProps }: AppProps) {
@@ -27,6 +28,11 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
   };
   useEffect(() => {
     if (!dataLoaded) {
+      store.setConfig({
+        provider: dataSourceProvider
+      });
+      store.fetchData();
+      /*
       // Add chains for cosmoshub, osmosis, terra-classic, teritori
       store.addChain({
         chain_id: 'cosmoshub-1',
@@ -137,6 +143,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
       store.addAssetItem({name:"Osmosis", tokenAmount: "5", tokenAmountPrice: "4.6"});
       store.addAssetItem({name:"Terra Classic", tokenAmount: "10.2", tokenAmountPrice: "80.3"});
       store.addAssetItem({name:"Teritori", tokenAmount: "10", tokenAmountPrice: "100"});
+      */
       dataLoaded = true;
     }
   }, []);

@@ -22,6 +22,14 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - asset folder: contains the code for the asset list and deposit form.
 - mobx folder: contains the code for the MobX state management library.
 
+To change data source, change the dataSourceProvider property in config/defaults.ts like this:
+export const dataSourceProvider = 'chain-registry';
+
+To add a new data source, need to do:
+- create a new file in mbox folder and implement the DataSourceAdapter interface.
+- Modify loadDataSource method in mobx/DataSourceConfigManager.ts to add the new data source.
+- Modify the dataSourceProvider property in config/defaults.ts to use the new data source.
+
 ## Related
 
 Checkout these related projects:

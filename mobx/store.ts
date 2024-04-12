@@ -1,4 +1,6 @@
 import { makeAutoObservable, action } from 'mobx';
+import { DataSourceConfigManager } from './DataSourceConfigManager';
+import { DataSource } from './DataSource';
 import { Chain, Chains, Asset, AssetList } from '@chain-registry/types';
 
 interface AssetItem {
@@ -8,6 +10,11 @@ interface AssetItem {
 }
 
 class ChainAssetStore {
+  dataSource: DataSource | null = null;
+  config: any = null;
+  isLoading: boolean = false;
+  isError: boolean = false;
+
   chains: Chains = [];
   assets: Asset[] = [];
   assetItems: AssetItem[] = [];
@@ -15,6 +22,10 @@ class ChainAssetStore {
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  setConfig(config: any) {
+    this.config = config;
   }
 
   addChain(chain: Chain) {
@@ -43,17 +54,29 @@ class ChainAssetStore {
       return [];
     }
     return this.assetLists[chainName];
-    /*return this.assets.filter(asset => {
-        if (!asset.traces) {
-            return false
+  }
+
+  async fetchData(): Promise<void> {
+    try {
+      this.isLoading = true;
+      this.isError = false;
+      const manager = await DataSourceConfigManager.getInstance(this.config);
+      this.dataSource = manager.getDataSource();
+      const fetchedData = await this.dataSource?.fetchData() || null;
+      if (fetchedData) {
+        this.chains = fetchedData.chains;
+        if(fetchedData.assetLists) {
+          for (const chainName in fetchedData.assetLists) {
+            this.addAssetList(chainName, fetchedData.assetLists[chainName]);
+          }
         }
-        for (const trace of asset.traces) {
-            if (trace.counterparty && trace.counterparty.chain_name === chainName) {
-            return true;
-            }
-        }
-        return true;
-    });*/
+        this.assetItems = fetchedData.assetItems;
+      }
+    } catch (error) {
+      this.isError = true;
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
 
